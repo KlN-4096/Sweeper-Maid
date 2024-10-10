@@ -22,10 +22,20 @@ public final class SMCommonConfig {
 	public static final ForgeConfigSpec.ConfigValue<String> DUSTBIN_NAME;
 	public static final ForgeConfigSpec.ConfigValue<String> CHAT_MESSAGE_AFTER_SWEEP;
 	public static final ForgeConfigSpec.IntValue PERMISSION_LEVEL_DUSTBIN;
+	public static final ForgeConfigSpec.IntValue ITEM_OVERLOAD_THRESHOLD;
+	public static final ForgeConfigSpec.ConfigValue<String> OVERLOAD_MESSAGE;
 
 	static {
 		BUILDER.push("sweeper_maid-common-config");
-		ITEM_SWEEP_INTERVAL = BUILDER.comment("If 0, disable item sweeping. If > 0, cool down (in seconds) between two item sweeping.").defineInRange("ITEM_SWEEP_INTERVAL", 600, 0, 360000);
+		ITEM_SWEEP_INTERVAL = BUILDER.comment("If 0, disable item sweeping. If > 0, cool down (in seconds) between two item sweeping.")
+				.defineInRange("ITEM_SWEEP_INTERVAL", 600, 0, 360000);
+
+		ITEM_OVERLOAD_THRESHOLD = BUILDER.comment("Item overload in a chunk. If exceeded, a warning message will be sent.")
+				.defineInRange("ITEM_OVERLOAD_THRESHOLD", 640, 1, 6400000);
+
+		OVERLOAD_MESSAGE = BUILDER.comment("Message to be sent when item overload threshold is exceeded. \"$1\" stands for chunk X position, \"$2\" stands for chunk Z position, and \"$3\" stands for item count.")
+				.define("OVERLOAD_MESSAGE", "[Sweeper Maid]: The number of dropped items in the region ($1, $2) is too high, with a total of $3 items!");
+
 		EXTRA_ENTITY_TYPES = BUILDER.comment("Other entities of types will be killed when cleaning, e.g. arrows. You can also kill mobs or even players by setting this.")
 				.defineListAllowEmpty("EXTRA_ENTITY_TYPES", List.of(
 						new ResourceLocation("arrow").toString(), new ResourceLocation("spectral_arrow").toString(), new ResourceLocation("oceanworld", "drip_ice").toString()
