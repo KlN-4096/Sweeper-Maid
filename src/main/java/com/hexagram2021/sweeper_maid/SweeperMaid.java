@@ -194,22 +194,20 @@ public class SweeperMaid {
 					});
 
 					// 发送掉落物超量区块信息给每个玩家
-					chunkItemCounts.forEach((chunk, itemCounts) -> {
-						itemCounts.forEach((itemKey, count) -> {
-							if (count > ITEM_OVERLOAD_THRESHOLD) {
-								BlockPos chunkPos = chunk.getPos().getWorldPosition();
-								String overloadMessageText = SMCommonConfig.OVERLOAD_MESSAGE.get()
-										.replace("$1", String.valueOf(chunkPos.getX() >> 4))
-										.replace("$2", String.valueOf(chunkPos.getZ() >> 4))
-										.replace("$3", String.valueOf(count))
-										.replace("$4", itemKey);
+					chunkItemCounts.forEach((chunk, itemCounts) -> itemCounts.forEach((itemKey, count) -> {
+                        if (count > ITEM_OVERLOAD_THRESHOLD) {
+                            BlockPos chunkPos = chunk.getPos().getWorldPosition();
+                            String overloadMessageText = SMCommonConfig.OVERLOAD_MESSAGE.get()
+                                    .replace("$1", String.valueOf(chunkPos.getX() >> 4))
+                                    .replace("$2", String.valueOf(chunkPos.getZ() >> 4))
+                                    .replace("$3", String.valueOf(count))
+                                    .replace("$4", itemKey);
 
-								MutableComponent overloadMessage = Component.literal(overloadMessageText).withStyle(ChatFormatting.BLUE);
+                            MutableComponent overloadMessage = Component.literal(overloadMessageText).withStyle(ChatFormatting.BLUE);
 
-								event.getServer().getPlayerList().getPlayers().forEach(player -> player.sendSystemMessage(overloadMessage));
-							}
-						});
-					});
+                            event.getServer().getPlayerList().getPlayers().forEach(player -> player.sendSystemMessage(overloadMessage));
+                        }
+                    }));
 
 					// 保存垃圾桶状态
 					SMSavedData.getInstance().setDirty();
