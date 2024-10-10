@@ -14,6 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -97,43 +98,58 @@ public class SweeperMaid {
 				}
 			}
 			case END -> {
-				SimpleContainer dustbin = SMSavedData.getDustbin();
-				if(this.firstTick) {
+				if (this.firstTick) {
 					this.firstTick = false;
 					this.toSweep = false;
-				} else if(this.toSweep) {
+				} else if (this.toSweep) {
 					this.toSweep = false;
-					SimpleContainer oldBin = new SimpleContainer(dustbin.getContainerSize());
-					for(int i = 0; i < dustbin.getContainerSize(); ++i) {
-						oldBin.setItem(i, dustbin.getItem(i));
-						dustbin.setItem(i, ItemStack.EMPTY);
-					}
+
+					// 获取所有垃圾桶
+					List<SimpleContainer> dustbins = SMSavedData.getDustbins();
+
+					SMSavedData.getInstance().removeAllDustbins();
+
 					AtomicInteger droppedItems = new AtomicInteger();
 					AtomicInteger extraEntities = new AtomicInteger();
+
 					event.getServer().getAllLevels().forEach(serverLevel -> {
 						Iterable<Entity> entities = serverLevel.getAllEntities();
 						List<Entity> killedEntities = Lists.newArrayList();
-						for(Entity entity: entities) {
-							if(entity instanceof ItemEntity itemEntity) {
-								dustbin.addItem(itemEntity.getItem());
-								droppedItems.addAndGet(1);
-								killedEntities.add(itemEntity);
-							} else if(entity != null) {
+
+						for (Entity entity : entities) {
+							if (entity instanceof ItemEntity itemEntity) {
+								ItemStack itemStack = itemEntity.getItem();
+								ResourceLocation itemKeyResourceLocation = ForgeRegistries.ITEMS.getKey(itemStack.getItem());
+
+								if (itemKeyResourceLocation != null) {
+									String itemKey = itemKeyResourceLocation.toString();
+
+									// 检查物品是否在黑名单中
+									if (SMCommonConfig.ITEM_BLACKLIST.get().contains(itemKey)) {
+										killedEntities.add(itemEntity); // 直接清除黑名单中的物品，不添加到垃圾箱
+									} else {
+										// 使用 addItemToDustbin 方法将物品添加到垃圾桶中
+										SMSavedData.getInstance().addItemToDustbin(itemStack);
+										droppedItems.incrementAndGet();
+										killedEntities.add(itemEntity);
+									}
+								}
+							} else if (entity != null) {
 								ResourceLocation typeKey = ForgeRegistries.ENTITY_TYPES.getKey(entity.getType());
 								if (typeKey != null) {
 									String type = typeKey.toString();
-									if(SMCommonConfig.EXTRA_ENTITY_TYPES.get().contains(type)) {
-										extraEntities.addAndGet(1);
+									if (SMCommonConfig.EXTRA_ENTITY_TYPES.get().contains(type)) {
+										extraEntities.incrementAndGet();
 										killedEntities.add(entity);
 									}
 								}
 							}
 						}
+
 						killedEntities.forEach(Entity::kill);
 					});
-					for(int i = 0; i < oldBin.getContainerSize(); ++i) {
-						dustbin.addItem(oldBin.getItem(i));
-					}
+
+					// 发送消息通知玩家
 					event.getServer().getPlayerList().getPlayers().forEach(player -> {
 						try {
 							player.connection.send(new ClientboundSetActionBarTextPacket(ComponentUtils.updateForEntity(
@@ -144,13 +160,33 @@ public class SweeperMaid {
 						} catch (CommandSyntaxException ignored) {
 						}
 					});
-					event.getServer().getPlayerList().broadcastSystemMessage(
-							Component.literal(SMCommonConfig.CHAT_MESSAGE_AFTER_SWEEP.get()).append(Component.literal("/sweepermaid dustbin").withStyle(style ->
-									style.withColor(ChatFormatting.GREEN).withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/sweepermaid dustbin")))), false
-					);
-					dustbin.setChanged();
+
+					// 动态生成垃圾桶列表信息并发送给每个玩家
+					event.getServer().getPlayerList().getPlayers().forEach(player -> {
+						MutableComponent message = Component.literal(SMCommonConfig.CHAT_MESSAGE_AFTER_SWEEP.get());
+
+						// 生成每个垃圾桶的命令链接
+						for (int i = 0; i < dustbins.size(); i++) {
+							final int dustbinIndex = i;
+							message = message.append(Component.literal("["+SMCommonConfig.DUSTBIN_NAME.get() + (dustbinIndex + 1) + "]")
+									.withStyle(style -> style.withColor(ChatFormatting.GREEN)
+											.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/sweepermaid dustbin " + dustbinIndex))));
+
+							if (dustbinIndex < dustbins.size() - 1) {
+								message = message.append(Component.literal(", "));
+							}
+						}
+
+						// 发送消息给当前玩家
+						player.sendSystemMessage(message);
+					});
+
+					// 保存垃圾桶状态
+					SMSavedData.getInstance().setDirty();
 				}
 			}
+
+
 		}
 	}
 
@@ -160,7 +196,7 @@ public class SweeperMaid {
 		assert world != null;
 		if (!world.isClientSide) {
 			SMSavedData worldData = world.getDataStorage().computeIfAbsent(SMSavedData::new, SMSavedData::new, SMSavedData.SAVED_DATA_NAME);
-			SMSavedData.setInstance(worldData);
+			SMSavedData.setInstance(worldData);  // 设置全局的实例
 		}
 	}
 
