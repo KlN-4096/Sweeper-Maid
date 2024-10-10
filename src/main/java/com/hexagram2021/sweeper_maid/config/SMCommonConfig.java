@@ -63,6 +63,7 @@ public final class SMCommonConfig {
 
 	}
 
+
 	public static ForgeConfigSpec getConfig() {
 		return SPEC;
 	}
