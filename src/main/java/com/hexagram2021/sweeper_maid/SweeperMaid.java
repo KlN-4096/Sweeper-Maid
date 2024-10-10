@@ -198,8 +198,8 @@ public class SweeperMaid {
                         if (count > ITEM_OVERLOAD_THRESHOLD) {
                             BlockPos chunkPos = chunk.getPos().getWorldPosition();
                             String overloadMessageText = SMCommonConfig.OVERLOAD_MESSAGE.get()
-                                    .replace("$1", String.valueOf(chunkPos.getX() >> 4))
-                                    .replace("$2", String.valueOf(chunkPos.getZ() >> 4))
+                                    .replace("$1", String.valueOf(chunkPos.getX()))
+                                    .replace("$2", String.valueOf(chunkPos.getZ()))
                                     .replace("$3", String.valueOf(count))
                                     .replace("$4", itemKey);
 
