@@ -60,7 +60,9 @@ public final class SMCommonConfig {
 		PERMISSION_LEVEL_DUSTBIN = BUILDER.comment("Permission level of a player to open the dustbin.").defineInRange("PERMISSION_LEVEL_DUSTBIN", 0, 0, 4);
 		BUILDER.pop();
 		SPEC = BUILDER.build();
+
 	}
+
 
 	public static ForgeConfigSpec getConfig() {
 		return SPEC;
