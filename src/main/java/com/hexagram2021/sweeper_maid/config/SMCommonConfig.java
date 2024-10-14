@@ -50,7 +50,7 @@ public final class SMCommonConfig {
 		MESSAGE_BEFORE_SWEEP_1_10 = BUILDER.comment("What message will be sent to players when there's 1s~10s left to sweep. \"$1\" stands for the remaining time (in seconds).")
 				.define("MESSAGE_BEFORE_SWEEP_1_10", "[Sweeper Maid]: I'll sweep the floor in $1 seconds!");
 		MESSAGE_AFTER_SWEEP = BUILDER.comment("What message will be sent to players after a sweep. \"$1\" stands for the number of killed dropped items, and \"$2\" stands for the number of killed entities.")
-				.define("MESSAGE_AFTER_SWEEP", "[Sweeper Maid]: $1 dropped items and $2 unnecessary entities are cleaned during this sweeping.");
+				.define("MESSAGE_AFTER_SWEEP", "[Sweeper Maid]: $1 dropped items , $2 unnecessary entities and $3 blacklist items are cleaned during this sweeping.");
 		MESSAGE_WRONG_DUSTBIN = BUILDER.comment("What message will be sent to players when open a wrong dustbin. ")
 				.define("MESSAGE_WRONG_DUSTBIN", "[Sweeper Maid]: Wrong dustbin.");
 		DUSTBIN_NAME = BUILDER.comment("Dustbin. ")

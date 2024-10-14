@@ -116,6 +116,7 @@ public class SweeperMaid {
 
 					AtomicInteger droppedItems = new AtomicInteger();
 					AtomicInteger extraEntities = new AtomicInteger();
+					AtomicInteger blacklistedItems = new AtomicInteger();
 					Map<LevelChunk, Map<String, Integer>> chunkItemCounts = new HashMap<>();
 
 					event.getServer().getAllLevels().forEach(serverLevel -> {
@@ -130,20 +131,21 @@ public class SweeperMaid {
 								if (itemKeyResourceLocation != null) {
 									String itemKey = itemKeyResourceLocation.toString();
 
-									// 检查物品是否在黑名单中
-									if (SMCommonConfig.ITEM_BLACKLIST.get().contains(itemKey)) {
-										killedEntities.add(itemEntity); // 直接清除黑名单中的物品，不添加到垃圾箱
-									} else {
-										// 使用 addItemToDustbin 方法将物品添加到垃圾桶中
-										SMSavedData.getInstance().addItemToDustbin(itemStack);
-										droppedItems.incrementAndGet();
-										killedEntities.add(itemEntity);
+									// 添加处理逻辑，确保每个物品实体只被处理一次
+									if (!killedEntities.contains(entity)) {
+										if (SMCommonConfig.ITEM_BLACKLIST.get().contains(itemKey)) {
+											blacklistedItems.addAndGet(itemStack.getCount());
+											killedEntities.add(itemEntity);
+										} else {
+											SMSavedData.getInstance().addItemToDustbin(itemStack);
+											droppedItems.addAndGet(itemStack.getCount());
+											killedEntities.add(itemEntity);
 
-										// 统计同种物品的数量
-										LevelChunk chunk = serverLevel.getChunkAt(entity.blockPosition());
-										chunkItemCounts.computeIfAbsent(chunk, k -> new HashMap<>());
-										Map<String, Integer> itemCounts = chunkItemCounts.get(chunk);
-										itemCounts.put(itemKey, itemCounts.getOrDefault(itemKey, 0) + itemStack.getCount());
+											LevelChunk chunk = serverLevel.getChunkAt(entity.blockPosition());
+											chunkItemCounts.computeIfAbsent(chunk, k -> new HashMap<>());
+											Map<String, Integer> itemCounts = chunkItemCounts.get(chunk);
+											itemCounts.put(itemKey, itemCounts.getOrDefault(itemKey, 0) + itemStack.getCount());
+										}
 									}
 								}
 							} else if (entity != null) {
@@ -166,12 +168,17 @@ public class SweeperMaid {
 						try {
 							player.connection.send(new ClientboundSetActionBarTextPacket(ComponentUtils.updateForEntity(
 									createCommandSourceStack(player, player.level(), player.blockPosition()),
-									Component.literal(SMCommonConfig.MESSAGE_AFTER_SWEEP.get().replace("$1", droppedItems.toString()).replace("$2", extraEntities.toString())).withStyle(ChatFormatting.AQUA),
+									Component.literal(SMCommonConfig.MESSAGE_AFTER_SWEEP.get()
+													.replace("$1", droppedItems.toString())
+													.replace("$2", extraEntities.toString())
+													.replace("$3", blacklistedItems.toString()))  // 增加黑名单物品统计
+											.withStyle(ChatFormatting.AQUA),
 									player, 0
 							)));
 						} catch (CommandSyntaxException ignored) {
 						}
 					});
+
 
 					// 动态生成垃圾桶列表信息并发送给每个玩家
 					event.getServer().getPlayerList().getPlayers().forEach(player -> {
