@@ -82,7 +82,7 @@ public class SweeperMaid {
 					event.getServer().getPlayerList().getPlayers().forEach(player -> {
 						try {
 							player.connection.send(new ClientboundSetActionBarTextPacket(ComponentUtils.updateForEntity(
-									createCommandSourceStack(player, player.level(), player.blockPosition()),
+									createCommandSourceStack(player, player.level, player.blockPosition()),
 									Component.literal(SMCommonConfig.MESSAGE_BEFORE_SWEEP_15_30_60.get().replace("$1", String.valueOf(this.sweepTickRemain / SharedConstants.TICKS_PER_SECOND))).withStyle(ChatFormatting.GRAY),
 									player, 0
 							)));
@@ -93,7 +93,7 @@ public class SweeperMaid {
 					event.getServer().getPlayerList().getPlayers().forEach(player -> {
 						try {
 							player.connection.send(new ClientboundSetActionBarTextPacket(ComponentUtils.updateForEntity(
-									createCommandSourceStack(player, player.level(), player.blockPosition()),
+									createCommandSourceStack(player, player.level, player.blockPosition()),
 									Component.literal(SMCommonConfig.MESSAGE_BEFORE_SWEEP_1_10.get().replace("$1", String.valueOf(this.sweepTickRemain / SharedConstants.TICKS_PER_SECOND))).withStyle(ChatFormatting.GOLD),
 									player, 0
 							)));
@@ -167,7 +167,7 @@ public class SweeperMaid {
 					event.getServer().getPlayerList().getPlayers().forEach(player -> {
 						try {
 							player.connection.send(new ClientboundSetActionBarTextPacket(ComponentUtils.updateForEntity(
-									createCommandSourceStack(player, player.level(), player.blockPosition()),
+									createCommandSourceStack(player, player.level, player.blockPosition()),
 									Component.literal(SMCommonConfig.MESSAGE_AFTER_SWEEP.get()
 													.replace("$1", droppedItems.toString())
 													.replace("$2", extraEntities.toString())

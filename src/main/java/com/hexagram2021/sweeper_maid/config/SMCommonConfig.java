@@ -37,12 +37,12 @@ public final class SMCommonConfig {
 				.define("OVERLOAD_MESSAGE", "[Sweeper Maid]: The number of dropped items in the region ($1, $2) is too high, with a total of $3 items!");
 
 		EXTRA_ENTITY_TYPES = BUILDER.comment("Other entities of types will be killed when cleaning, e.g. arrows. You can also kill mobs or even players by setting this.")
-				.defineListAllowEmpty("EXTRA_ENTITY_TYPES", List.of(
+				.defineList("EXTRA_ENTITY_TYPES", List.of(
 						new ResourceLocation("arrow").toString(), new ResourceLocation("spectral_arrow").toString(), new ResourceLocation("oceanworld", "drip_ice").toString()
 				), o -> o instanceof String str && ResourceLocation.isValidResourceLocation(str));
 		// 添加黑名单配置
 		ITEM_BLACKLIST = BUILDER.comment("Items in this list will be cleaned but not added to the dustbin.")
-				.defineListAllowEmpty("ITEM_BLACKLIST", List.of(
+				.defineList("ITEM_BLACKLIST", List.of(
 						new ResourceLocation("minecraft", "cobblestone").toString(), new ResourceLocation("minecraft", "sand").toString()
 				), o -> o instanceof String str && ResourceLocation.isValidResourceLocation(str));
 		MESSAGE_BEFORE_SWEEP_15_30_60 = BUILDER.comment("What message will be sent to players when there's 15s, 30s and 60s left to sweep. \"$1\" stands for the remaining time (in seconds).")

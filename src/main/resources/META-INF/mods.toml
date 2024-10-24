@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[47,)"
+loaderVersion="[43,)"
 license="AGPL v3"
 issueTrackerURL="https://github.com/Viola-Siemens/Sweeper-Maid/issues"
 
@@ -17,13 +17,13 @@ A lightweight mod that collects all dropped items.
 [[dependencies.sweeper_maid]]
     modId="forge"
     mandatory=true
-    versionRange="[47,)"
+    versionRange="[43,)"
     ordering="NONE"
     side="BOTH"
 
 [[dependencies.sweeper_maid]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.20,1.21)"
+    versionRange="[1.19,1.20)"
     ordering="NONE"
     side="BOTH"
